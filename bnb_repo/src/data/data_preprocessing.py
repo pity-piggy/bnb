@@ -3,6 +3,20 @@ import numpy as np
 from datetime import datetime
 
 
+def haversine_distance(lat1, lon1, lat2, lon2):
+    """
+    Compute haversine distance (in km) between two geo coordinates.
+    """
+    R = 6371  # Earth radius in kilometers
+    lat1, lon1, lat2, lon2 = map(np.radians, [lat1, lon1, lat2, lon2])
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+
+    a = np.sin(dlat / 2.0) ** 2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon / 2.0) ** 2
+    c = 2 * np.arcsin(np.sqrt(a))
+    return R * c
+
+
 def load_and_clean_data(filepath):
     # Load raw data
     df = pd.read_csv(filepath, low_memory=False)
@@ -30,6 +44,10 @@ def load_and_clean_data(filepath):
     today = pd.to_datetime("today")
     df['host_tenure_days'] = (today - df['host_since']).dt.days
     df.drop(columns='host_since', inplace=True)
+
+    # Add distance to McGill University (Downtown Montreal)
+    mcgill_lat, mcgill_lon = 45.5048, -73.5772
+    df['distance_to_downtown'] = haversine_distance(df['latitude'], df['longitude'], mcgill_lat, mcgill_lon)
 
     # Handle missing values
     for col in df.select_dtypes(include=['float64', 'int64']).columns:
@@ -76,5 +94,5 @@ def load_and_clean_data(filepath):
 # Example usage
 if __name__ == "__main__":
     df_cleaned = load_and_clean_data("../../data/raw/listings2.csv")
-    df_cleaned.to_csv("../../data/processed/airbnb_montreal_cleaned.csv", index=False)
-    print(" Data cleaned and saved.")
+    df_cleaned.to_csv("../../data/interim/airbnb_montreal_tmp.csv", index=False)
+    print("Data cleaned and saved.")
