@@ -50,16 +50,20 @@ print(f" Best Parameters: {grid_search.best_params_}")
 train_rmse = np.sqrt(mean_squared_error(y_train, best_model.predict(X_train)))
 test_rmse = np.sqrt(mean_squared_error(y_test, best_model.predict(X_test)))
 
+
+y_pred_log = best_model.predict(X_test)
+y_pred_price = np.expm1(y_pred_log)
+y_test_price = np.expm1(y_test)
+
+real_rmse = np.sqrt(mean_squared_error(y_test_price, y_pred_price))
+
+
 print(f"\n Training RMSE: {train_rmse:.2f}")
 print(f"Test RMSE: {test_rmse:.2f}")
+print(f"Actual RMSE in dollars: ${real_rmse:.2f}")
 
 # === Save Model ===
 os.makedirs("models", exist_ok=True)
 joblib.dump(best_model, "/Users/chloe/PycharmProjects/bnb/bnb_repo/models/xgb_model.joblib")
 print("Model saved to /Users/chloe/PycharmProjects/bnb/bnb_repo/models/xgb_model.joblib")
 
-import matplotlib.pyplot as plt
-import xgboost as xgb
-
-xgb.plot_importance(best_model, max_num_features=20)
-plt.show()
