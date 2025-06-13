@@ -14,12 +14,13 @@ import mlflow
 import mlflow.sklearn  # or mlflow.xgboost if logging native model
 
 mlflow.set_tracking_uri("file:///Users/chloe/PycharmProjects/bnb/bnb_repo/mlruns")
-mlflow.set_experiment("airbnb_pricing_models")
+mlflow.set_experiment("airbnb_pricing_models_1")
 
 # === STEP 1: Load Data ===
 df = pd.read_csv("/Users/chloe/PycharmProjects/bnb/bnb_repo/data/processed/airbnb_montreal_cleaned.csv")
+df=df[df['price']<1000]
 X = df.drop(columns=["log_price", "price", "log_price_per_person"])
-y = df["log_price"]
+y = df["log_price_per_person"]
 
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42
@@ -84,8 +85,8 @@ for name, cfg in model_configs.items():
     print(f"✅ Best Params for {name}: {grid.best_params_}")
     print(f"🧠 R2: {r2:.3f} | RMSE (log): {rmse:.3f} | MAE (log): {mae:.3f} | 💰 RMSE ($): {real_rmse:.2f}")
 
-    # # Save model
-    # joblib.dump(best_model, BASE_DIR / "models"/f"{name}_model.joblib")
+    # Save model
+    joblib.dump(best_model, BASE_DIR / "models"/f"{name}_model.joblib")
 
 
 

@@ -19,8 +19,9 @@ def load_data_and_model():
 
     # Load and split data
     df = pd.read_csv(data_path)
+    df = df[df['price'] < 1000]
     X = df.drop(columns=["log_price","price","log_price_per_person"])
-    y = df["log_price"]
+    y = df["log_price_per_person"]
 
     # Reuse same split as before
     from sklearn.model_selection import train_test_split
@@ -63,38 +64,39 @@ def plot_pred_vs_actual(model, X_test, y_test, save_path=None):
     else:
         plt.show()
 
+#
+# def plot_feature_importance(model, save_path=None, max_features=20):
+#     # Get feature importances as a DataFrame
+#     booster = model.get_booster()
+#     importance = booster.get_score(importance_type='gain')
+#     importance_df = pd.DataFrame({
+#         'Feature': list(importance.keys()),
+#         'Importance': list(importance.values())
+#     }).sort_values(by='Importance', ascending=False).head(max_features)
+#
+#     # Plot
+#     plt.figure(figsize=(10, 8))
+#     bars = plt.barh(importance_df['Feature'], importance_df['Importance'], color='steelblue')
+#     plt.xlabel("Gain-based Importance", fontsize=12)
+#     plt.title(f"Top {max_features} Feature Importances", fontsize=14)
+#     plt.gca().invert_yaxis()  # Most important on top
+#
+#     # Add value labels inside bars
+#     for bar in bars:
+#         width = bar.get_width()
+#         plt.text(width - (width * 0.05),  # position left a bit
+#                  bar.get_y() + bar.get_height() / 2,
+#                  f"{width:.2f}",
+#                  va='center', ha='right', fontsize=9, color='white')
+#
+#     plt.tight_layout()
+#
+#     if save_path:
+#         plt.savefig(save_path, dpi=300)
+#         print(f" Feature importance plot saved to {save_path}")
+#     else:
+#         plt.show()
 
-def plot_feature_importance(model, save_path=None, max_features=20):
-    # Get feature importances as a DataFrame
-    booster = model.get_booster()
-    importance = booster.get_score(importance_type='gain')
-    importance_df = pd.DataFrame({
-        'Feature': list(importance.keys()),
-        'Importance': list(importance.values())
-    }).sort_values(by='Importance', ascending=False).head(max_features)
-
-    # Plot
-    plt.figure(figsize=(10, 8))
-    bars = plt.barh(importance_df['Feature'], importance_df['Importance'], color='steelblue')
-    plt.xlabel("Gain-based Importance", fontsize=12)
-    plt.title(f"Top {max_features} Feature Importances", fontsize=14)
-    plt.gca().invert_yaxis()  # Most important on top
-
-    # Add value labels inside bars
-    for bar in bars:
-        width = bar.get_width()
-        plt.text(width - (width * 0.05),  # position left a bit
-                 bar.get_y() + bar.get_height() / 2,
-                 f"{width:.2f}",
-                 va='center', ha='right', fontsize=9, color='white')
-
-    plt.tight_layout()
-
-    if save_path:
-        plt.savefig(save_path, dpi=300)
-        print(f" Feature importance plot saved to {save_path}")
-    else:
-        plt.show()
 def plot_residuals(model, X_test, y_test, save_path=None):
     import matplotlib.pyplot as plt
     import seaborn as sns
@@ -135,7 +137,7 @@ if __name__ == "__main__":
     # Predicted vs Actual Plot
     plot_pred_vs_actual(model, X_test, y_test, save_path=FIGURE_DIR /"pred_vs_actual.png")
     # Feature Importance Plot
-    plot_feature_importance(model, save_path=FIGURE_DIR /"feature_importance.png")
+    # plot_feature_importance(model, save_path=FIGURE_DIR /"feature_importance.png")
 
     plot_residuals(model, X_test, y_test, save_path=FIGURE_DIR / "residuals_plot.png")
 
