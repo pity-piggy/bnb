@@ -67,7 +67,7 @@ def load_and_clean_data(filepath):
 
     #cap minimal and maximum nights
     df['maximum_nights_capped'] = df['maximum_nights'].clip(upper=365)
-    df['minimum_nights_capped'] = df['minimum_nights'].clip(upper=90)
+    df['minimum_nights_capped'] = df['minimum_nights'].clip(upper=120)
 
     # Limit neighbourhood_cleansed to top 10
     top_neighborhoods = df['neighbourhood_cleansed'].value_counts().nlargest(10).index
@@ -80,7 +80,9 @@ def load_and_clean_data(filepath):
     df['property_type'] = df['property_type'].apply(
         lambda x: x if x in top_property_types else 'Other'
     )
-
+    # Add log-transformed targets
+    df["log_price"] = np.log1p(df["price"])
+    df["log_price_per_person"] = np.log1p(df["price_per_person"])
 
     # One-hot encode categorical variables
     categorical_cols = ['room_type', 'property_type', 'neighbourhood_cleansed']
