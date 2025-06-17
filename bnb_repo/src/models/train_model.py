@@ -23,9 +23,10 @@ def train_and_log(data_path, target_column, experiment_name):
     mlflow.set_tracking_uri("file:///Users/chloe/PycharmProjects/bnb/bnb_repo/mlruns")
     mlflow.set_experiment(experiment_name)
 
+
     # Load Data
     df = pd.read_csv(data_path)
-    X = df.drop(columns=["log_price", "price", "log_price_per_person"], errors="ignore")
+    X = df.drop(columns=["log_price", "price", "log_price_per_person","price_per_person"], errors="ignore")
     y = df[target_column]
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
@@ -95,11 +96,13 @@ def train_and_log(data_path, target_column, experiment_name):
         with mlflow.start_run(run_name=name.upper()):
             mlflow.log_params(grid.best_params_)
             mlflow.log_metrics({
-                "rmse_log": rmse,
+                "rmse_raw": rmse,
                 "r2_score": r2,
                 "mae_log": mae,
                 "rmse_dollar": real_rmse
             })
+            mlflow.set_tag("dataset_used", Path(data_path).name)  # Tag: "airbnb_montreal_cleaned.csv"
+            mlflow.log_artifact(data_path, artifact_path="input_data")  # Optional: Log actual file
 
             input_example = X_test.iloc[:5]
             signature = infer_signature(X_test, y_pred)
@@ -113,14 +116,8 @@ def train_and_log(data_path, target_column, experiment_name):
 
         print(f"Logged {name} model to MLflow.")
 
-        results.append({
-            "model": name,
-            "r2_score": r2,
-            "rmse_log": rmse,
-            "mae_log": mae,
-            "rmse_dollar": real_rmse,
-            "best_params": grid.best_params_
-        })
+
+
 
     # Optional: Save results
     # pd.DataFrame(results).to_csv(BASE_DIR / "models" / "model_comparison.csv", index=False)
@@ -137,3 +134,6 @@ if __name__ == "__main__":
     train_and_log("/Users/chloe/PycharmProjects/bnb/bnb_repo/data/processed/airbnb_montreal_cleaned.csv",
                   "log_price",
                   "airbnb_pricing_models_2")
+    train_and_log("/Users/chloe/PycharmProjects/bnb/bnb_repo/data/processed/airbnb_montreal_cleaned_1.csv",
+                  "log_price",
+                  "airbnb_pricing_models_3")
