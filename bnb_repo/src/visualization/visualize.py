@@ -90,6 +90,8 @@ def plot_feature_importance(model, feature_names, save_path=None):
     else:
         plt.show()
 
+
+
 if __name__ == "__main__":
     BASE_DIR = get_base_dir()
     FIGURE_DIR = BASE_DIR / "reports" / "figures"
